@@ -249,11 +249,12 @@ class GcGANCrossModel(BaseModel):
         return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
 
     def save(self, label):
-        self.save_network(self.netG_AB, 'G_AB', label, self.gpu_ids)
-        self.save_network(self.netG_AB, 'G_gc_AB', label, self.gpu_ids)
-        self.save_network(self.netD_B, 'D_B', label, self.gpu_ids)
-        self.save_network(self.netD_gc_B, 'D_gc_B', label, self.gpu_ids)
-        
+        p1 = self.save_network(self.netG_AB, 'G_AB', label, self.gpu_ids)
+        p2 = self.save_network(self.netG_AB, 'G_gc_AB', label, self.gpu_ids)
+        p3 = self.save_network(self.netD_B, 'D_B', label, self.gpu_ids)
+        p4 = self.save_network(self.netD_gc_B, 'D_gc_B', label, self.gpu_ids)
+        return [p1, p2, p3, p4]
+    
     def set_eval(self):
         self.netG_AB.eval()
         self.netG_gc_AB.eval()
