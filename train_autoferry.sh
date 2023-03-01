@@ -1,4 +1,6 @@
-python train.py --dataroot "/home/andy/data/complete_dataset_processed/autoferry" \
+DATAROOT="/home/andy/data/complete_dataset_processed/autoferry"
+
+python train.py --dataroot $DATAROOT \
 --name rgb2ir \
 --model gc_gan_cross \
 --pool_size 50 \
@@ -14,8 +16,4 @@ python train.py --dataroot "/home/andy/data/complete_dataset_processed/autoferry
 --geometry rot \
 --resize_or_crop "resize" \
 --dataset_mode unaligned \
---no_html \
---continue_train \
---epoch_count 30 \
---epoch 30 \
---nThreads 4
+--no_html
