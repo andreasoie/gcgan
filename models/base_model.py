@@ -45,6 +45,7 @@ class BaseModel():
         torch.save(network.cpu().state_dict(), save_path)
         if len(gpu_ids) and torch.cuda.is_available():
             network.cuda(gpu_ids[0])
+        return save_path
 
     # helper loading function that can be used by subclasses
     def load_network(self, network, network_label, epoch_label):
@@ -57,4 +58,4 @@ class BaseModel():
         for scheduler in self.schedulers:
             scheduler.step()
         lr = self.optimizers[0].param_groups[0]['lr']
-        print('learning rate = %.7f' % lr)
+        return lr

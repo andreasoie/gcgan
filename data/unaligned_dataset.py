@@ -15,7 +15,7 @@ class UnalignedDataset(BaseDataset):
 
         self.A_paths = make_dataset(self.dir_A)
         self.B_paths = make_dataset(self.dir_B)
-
+        
         self.A_paths = sorted(self.A_paths)
         self.B_paths = sorted(self.B_paths)
         self.A_size = len(self.A_paths)
