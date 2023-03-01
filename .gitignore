@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+checkpoints/rgb2ir/
+
+
+wandb/
+checkpoints/
