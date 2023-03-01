@@ -1,8 +1,10 @@
 from collections import OrderedDict
+import os
 import time
 
 import numpy as np
 import torch
+import wandb
 from options.train_options import TrainOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model
@@ -30,6 +32,26 @@ def tensor2im(input_image, imtype=np.uint8):
         image_numpy = input_image
     return image_numpy.astype(imtype)
 
+def save_snapshot_image(fname: str, visuals: OrderedDict) -> None:
+    fig, axs = plt.subplots(nrows=1, ncols=len(visuals), squeeze=False, figsize=(40, 10))
+    for i, (label, image) in enumerate(visuals.items()):
+        image = tensor2im(image)
+        axs[0, i].imshow(image)
+        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+        axs[0, i].set_title(label, fontsize=25)
+    plt.savefig(fname)
+    plt.tight_layout()
+    plt.close()
+    
+def seconds_to_time(seconds: float) -> str:
+    hours = seconds // 3600
+    minutes = (seconds - hours * 3600) // 60
+    seconds = seconds - hours * 3600 - minutes * 60
+    return f"{int(hours)}h {int(minutes)}m {seconds:.2f}s"
+    
+# pin memory to speed up data loading
+torch.backends.cudnn.benchmark = True
+torch.cuda.empty_cache()
 
 opt = TrainOptions().parse()
 data_loader = CreateDataLoader(opt)
@@ -41,18 +63,16 @@ visualizer = Visualizer(opt)
 total_steps = 0
 opt.max_iter_num = (opt.niter + opt.niter_decay)*3000
 
+NAME = "gcgan"
 
-def save_snapshot_image(idx: int, visuals: OrderedDict) -> None:
-    fig, axs = plt.subplots(nrows=1, ncols=len(visuals), squeeze=False, figsize=(40, 10))
-    for i, (label, image) in enumerate(visuals.items()):
-        image = tensor2im(image)
-        axs[0, i].imshow(image)
-        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-        axs[0, i].set_title(label, fontsize=25)
-    plt.savefig(f"tmp/step_{idx}.png")
-    plt.tight_layout()
-    plt.close()
-    
+os.makedirs(f"snapshots/{NAME}", exist_ok=True)
+os.makedirs("checkpoints", exist_ok=True)
+
+wandb.init(project="gcgan", entity="andreasoie", resume="allow")
+wandb.config.update(opt, allow_val_change=True)
+
+round_trip_times = []
+n_epochs_left = opt.niter + opt.niter_decay - opt.epoch_count
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
     epoch_iter = 0
@@ -69,23 +89,32 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
         if total_steps % opt.print_freq == 0:
             errors = model.get_current_errors()
             t = (time.time() - iter_start_time) / opt.batchSize
+            meta = {"epoch": epoch, "epoch_iter": epoch_iter, **errors}
+            wandb.log(meta)
             visualizer.print_current_errors(epoch, epoch_iter, errors, t)
 
         if total_steps % opt.save_latest_freq == 0:
-            # print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
-            model.save('latest')
-            
+            for save_path in model.save('latest'):
+                wandb.save(save_path)
+                
         if total_steps % 2500 == 0:
             model.set_eval()
             with torch.no_grad():
                 model.test()
-                save_snapshot_image(total_steps, model.get_current_visuals())
+                filename = f"tmp/step_{total_steps}.png"
+                save_snapshot_image(filename, model.get_current_visuals())
+                wandb.log({"snapshot": wandb.Image(filename)})
             model.set_train()
 
     if epoch % opt.save_epoch_freq == 0:
-        # print('Saving the model at epoch %d, iters %d' % (epoch, total_steps))
-        model.save('latest')
-        model.save(epoch)
+        for save_path in model.save('latest'):
+            wandb.save(save_path)
+        for save_path in model.save(epoch):
+            wandb.save(save_path)
 
-    print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
-    model.update_learning_rate()
+    lr = model.update_learning_rate()
+    n_epochs_left -= 1
+    round_trip_time = time.time() - epoch_start_time
+    round_trip_times.append(round_trip_time)
+    avg_time_left = seconds_to_time(n_epochs_left * (np.mean(round_trip_times)))
+    print(f"End of epoch {str(epoch).ljust(3)}/{str(opt.niter + opt.niter_decay).ljust(3)}, Time Taken: {str(round(round_trip_time, 1)).ljust(5)} sec, lr = {str(lr).ljust(10)}, AVG ETR: {avg_time_left.ljust(13)}")
