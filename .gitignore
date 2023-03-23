@@ -133,3 +133,4 @@ checkpoints/rgb2ir/
 
 wandb/
 checkpoints/
+outputs
