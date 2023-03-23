@@ -1,7 +1,8 @@
-DATAROOT="/home/andy/data/complete_dataset_processed/autoferry"
+DATAROOT="/home/andreoi/data/autoferry"
 
 python train.py --dataroot $DATAROOT \
 --name rgb2ir \
+--phase train \
 --model gc_gan_cross \
 --pool_size 50 \
 --no_dropout \
@@ -10,7 +11,7 @@ python train.py --dataroot $DATAROOT \
 --which_direction AtoB \
 --dataset_mode unaligned \
 --resize_or_crop "resize" \
---batchSize 1 \
+--batchSize 8 \
 --nThreads 4 \
 --input_nc 3 \
 --output_nc 3 \
