@@ -17,4 +17,6 @@ python train.py --dataroot $DATAROOT \
 --gpu_ids 0 \
 --identity 0.3 \
 --geometry rot \
---no_html
+--no_html \
+--niter 200 \
+--niter_decay 200

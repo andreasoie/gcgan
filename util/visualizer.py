@@ -1,11 +1,18 @@
-import numpy as np
-import os
 import ntpath
+import os
 import time
-from . import util
-from . import html
+
+import numpy as np
+
+from . import html, util
 
 
+def save_image(outdir, visuals, image_paths, aspect_ratio=1.0):
+    short_path = ntpath.basename(image_paths[0])
+    name = os.path.splitext(short_path)[0]
+    save_path = os.path.join(outdir, f"{name}.png")
+    util.save_image(visuals["fake_B"], save_path)
+    
 class Visualizer():
     def __init__(self, opt):
         # self.opt = opt
