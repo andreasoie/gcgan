@@ -1,6 +1,7 @@
 import torch.utils.data as data
-from PIL import Image
 import torchvision.transforms as transforms
+from PIL import Image
+
 
 class BaseDataset(data.Dataset):
     def __init__(self):
@@ -37,8 +38,6 @@ def get_transform(opt):
         transform_list.append(transforms.RandomHorizontalFlip())
 
     # if opt.isTrain and opt.rotation:
-        
-
     transform_list += [transforms.ToTensor(),
                        transforms.Normalize((0.5, 0.5, 0.5),
                                             (0.5, 0.5, 0.5))]

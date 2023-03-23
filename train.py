@@ -1,17 +1,19 @@
-from collections import OrderedDict
 import os
+import pdb
 import time
+from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from tqdm import tqdm
+
 import wandb
-from options.train_options import TrainOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model
+from options.train_options import TrainOptions
 from util.visualizer import Visualizer
-import pdb
-from tqdm import tqdm
-import matplotlib.pyplot as plt
+
 
 def tensor2im(input_image, imtype=np.uint8):
     """"Converts a Tensor array into a numpy image array.
@@ -57,7 +59,8 @@ opt = TrainOptions().parse()
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 dataset_size = len(data_loader)
-print('#training images = %d' % dataset_size)
+
+print('N Training images = %d' % dataset_size)
 model = create_model(opt)
 visualizer = Visualizer(opt)
 total_steps = 0
@@ -101,7 +104,7 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
             model.set_eval()
             with torch.no_grad():
                 model.test()
-                filename = f"tmp/step_{total_steps}.png"
+                filename = f"snapshots/step_{total_steps}.png"
                 save_snapshot_image(filename, model.get_current_visuals())
                 wandb.log({"snapshot": wandb.Image(filename)})
             model.set_train()
