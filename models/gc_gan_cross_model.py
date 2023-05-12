@@ -70,14 +70,6 @@ class GcGANCrossModel(BaseModel):
             for optimizer in self.optimizers:
                 self.schedulers.append(networks.get_scheduler(optimizer, opt))
 
-        # print('---------- Networks initialized -------------')
-        # networks.print_network(self.netG_AB)
-        # networks.print_network(self.netG_gc_AB)
-        # if self.isTrain:
-        #     networks.print_network(self.netD_B)
-        #     networks.print_network(self.netD_gc_B)
-        # print('-----------------------------------------------')
-        
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
