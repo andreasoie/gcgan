@@ -6,3 +6,5 @@ dominate
 matplotlib
 tqdm
 wandb
+munch
+scipy

@@ -1,17 +1,21 @@
+import itertools
+import math
+import os
+import pdb
+import random
+import sys
+from collections import OrderedDict
+
 import numpy as np
 import torch
-import os
-from collections import OrderedDict
 from torch.autograd import Variable
-import itertools
+
 import util.util as util
 from util.image_pool import ImagePool
-from .base_model import BaseModel
+
 from . import networks
-import random
-import math
-import sys
-import pdb
+from .base_model import BaseModel
+
 
 class GcGANCrossModel(BaseModel):
     def name(self):
@@ -21,7 +25,6 @@ class GcGANCrossModel(BaseModel):
         BaseModel.initialize(self, opt)
         nb = opt.batchSize
         size = opt.fineSize
-
 
         self.input_A = self.Tensor(nb, opt.input_nc, size, size)
         self.input_B = self.Tensor(nb, opt.output_nc, size, size)
@@ -67,14 +70,14 @@ class GcGANCrossModel(BaseModel):
             for optimizer in self.optimizers:
                 self.schedulers.append(networks.get_scheduler(optimizer, opt))
 
-        print('---------- Networks initialized -------------')
-        networks.print_network(self.netG_AB)
-        networks.print_network(self.netG_gc_AB)
-        if self.isTrain:
-            networks.print_network(self.netD_B)
-            networks.print_network(self.netD_gc_B)
-        print('-----------------------------------------------')
-
+        # print('---------- Networks initialized -------------')
+        # networks.print_network(self.netG_AB)
+        # networks.print_network(self.netG_gc_AB)
+        # if self.isTrain:
+        #     networks.print_network(self.netD_B)
+        #     networks.print_network(self.netD_gc_B)
+        # print('-----------------------------------------------')
+        
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
@@ -258,10 +261,13 @@ class GcGANCrossModel(BaseModel):
     def set_eval(self):
         self.netG_AB.eval()
         self.netG_gc_AB.eval()
-        self.netD_B.eval()
-        self.netD_gc_B.eval()
+        if self.isTrain:
+            self.netD_B.eval()
+            self.netD_gc_B.eval()
         
     def set_train(self):
+        if not self.isTrain:
+            raise ValueError("set_train should not be called when isTrain is False")
         self.netG_AB.train()
         self.netG_gc_AB.train()
         self.netD_B.train()

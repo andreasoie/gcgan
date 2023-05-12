@@ -14,8 +14,6 @@ class BaseDataset(data.Dataset):
         pass
 
 def get_transform(opt):
-    from pprint import pprint
-    pprint(vars(opt))
     transform_list = []
     if opt.resize_or_crop == 'resize':
         osize = [opt.loadSize, opt.loadSize]

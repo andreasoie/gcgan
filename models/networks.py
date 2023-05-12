@@ -1,10 +1,12 @@
+import functools
+
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn import init
-import functools
 from torch.autograd import Variable
+from torch.nn import init
 from torch.optim import lr_scheduler
-import numpy as np
+
 ###############################################################################
 # Functions
 ###############################################################################
@@ -59,7 +61,6 @@ def weights_init_orthogonal(m):
 
 
 def init_weights(net, init_type='normal'):
-    print('initialization method [%s]' % init_type)
     if init_type == 'normal':
         net.apply(weights_init_normal)
     elif init_type == 'xavier':

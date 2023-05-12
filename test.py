@@ -1,11 +1,12 @@
-import time
 import os
-from options.test_options import TestOptions
+import pdb
+import time
+
 from data.data_loader import CreateDataLoader
 from models.models import create_model
-from util.visualizer import Visualizer
+from options.test_options import TestOptions
 from util import html
-import pdb
+from util.visualizer import Visualizer
 
 opt = TestOptions().parse()
 opt.nThreads = 1   # test code only supports nThreads = 1
